@@ -5,6 +5,9 @@ class User(models.Model):
 	username = models.CharField(primary_key=True, max_length=100)
 	password = models.CharField(max_length=100)
 
+	def __str__(self):
+		return self.username
+
 	@classmethod
 	def Get(cls, username):
 		users = cls.objects.filter(username=username)
@@ -50,42 +53,55 @@ class User(models.Model):
 
 class Message(models.Model):
 	text = models.CharField(max_length=500)
+	chat = models.ForeignKey("Chat")
+
+	def __str__(self):
+		return str(chat)+": "+self.text
 
 	@classmethod
-	def Get(cls, text):
-		messages = cls.objects.filter(text=text)
+	def Get(cls, message_id):
+		messages = cls.objects.filter(id=message_id)
 		message = messages[0]
-		if user:
-			return user
+		if message:
+			return message
 		else:
 			return None
 
 	@classmethod
-	def Create(cls, text):
-		message = cls.Get(text)
-		if message:
+	def GetByChat(cls, chat):
+		messages = cls.objects.filter(chat=chat)
+		if len(messages) < 1:
 			return None
 		else:
-			message = cls(text=text)
-			message.save()
-			return message
+			return messages
+
+	@classmethod
+	def Create(cls, text, chat):
+		message = cls(text=text, chat=chat)
+		message.save()
+		return message
 
 	@classmethod
 	def Delete(cls, message_id):
-		message = cls.objects.get(pk=message_id)
-		if message:
-			message.delete()
-			return True
-		else:
+		messages = cls.objects.filter(id=message_id)
+		if len(messages) < 1:
 			return False
+		message = messages[0]
+		message.delete()
+		return True
 
 class Chat(models.Model):
 	users = models.ManyToManyField(User)
-	messages = models.ManyToManyField(Message)
+
+	def __str__(self):
+		return str(self.id)
 
 	@classmethod
 	def Get(cls, chat_id):
-		chat = cls.objects.get(pk=chat_id)
+		chats = cls.objects.filter(pk=chat_id)
+		if len(chats) < 1:
+			return None
+		chat = chats[0]
 		if chat:
 			return chat
 		else:
@@ -94,6 +110,7 @@ class Chat(models.Model):
 	@classmethod
 	def Create(cls, list_of_users):
 		chat = cls()
+		chat.save()
 		for user in list_of_users:
 			chat.users.add(user)
 		chat.save()
@@ -101,24 +118,24 @@ class Chat(models.Model):
 
 	@classmethod
 	def Update(cls, chat_id, list_of_users):
-		chat = cls.objects.get(pk=chat_id)
-		current_users = chat.users.all()
-		if chat:
-			for user in list_of_users:
-				if not user in list_of_users:
-					chat.users.add(user)
-			for user in current_users:
-				if not user in list_of_users:
-					chat.users.remove(user)
-			user.save()
-		else:
+		chats = cls.objects.filter(pk=chat_id)
+		if len(chats) < 1:
 			return None
+		chat = chats[0]
+		current_users = chat.users.all()
+		for user in list_of_users:
+			if not user in list_of_users:
+				chat.users.add(user)
+		for user in current_users:
+			if not user in list_of_users:
+				chat.users.remove(user)
+		user.save()
 
 	@classmethod
 	def Delete(cls, chat_id):
-		chat = cls.objects.get(pk=chat_id)
-		if chat:
-			chat.delete()
-			return True
-		else:
+		chats = cls.objects.filter(pk=chat_id)
+		if len(chats) < 1:
 			return False
+		chat = chats[0]
+		chat.delete()
+		return True
