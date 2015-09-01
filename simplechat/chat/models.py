@@ -7,16 +7,16 @@ class User(models.Model):
 
 	@classmethod
 	def Get(cls, username):
-		user = cls.get(username=username)
-		if user:
-			return user
+		users = cls.objects.filter(username=username)
+		if users:
+			return users[0]
 		else:
 			return None
 
 	@classmethod
 	def Create(cls, username, password):
-		user = cls.get(username=username)
-		if user:
+		users = cls.objects.filter(username=username)
+		if len(users) > 0:
 			return None
 		else:
 			user = cls(username=username, password=password)
@@ -25,8 +25,9 @@ class User(models.Model):
 
 	@classmethod
 	def Update(cls, username, new_username=None, password=None):
-		user = cls.get(username=username)
-		if user:
+		users = cls.objects.filter(username=username)
+		if len(users) == 1:
+			user = users[0]
 			if new_username:
 				user.username = new_username
 			if password:
@@ -36,10 +37,12 @@ class User(models.Model):
 		else:
 			return None
 
+
 	@classmethod
 	def Delete(cls, username):
-		user = cls.get(username=username)
-		if user:
+		users = cls.objects.filter(username=username)
+		if len(users) == 1:
+			user = users[0]
 			user.delete()
 			return True
 		else:
@@ -69,7 +72,7 @@ class Message(models.Model):
 
 	@classmethod
 	def Delete(cls, message_id):
-		message = cls.get(pk=message_id)
+		message = cls.objects.get(pk=message_id)
 		if message:
 			message.delete()
 			return True
@@ -82,7 +85,7 @@ class Chat(models.Model):
 
 	@classmethod
 	def Get(cls, chat_id):
-		chat = cls.get(pk=chat_id)
+		chat = cls.objects.get(pk=chat_id)
 		if chat:
 			return chat
 		else:
@@ -92,18 +95,18 @@ class Chat(models.Model):
 	def Create(cls, list_of_users):
 		chat = cls()
 		for user in list_of_users:
-			chat.add(user)
+			chat.users.add(user)
 		chat.save()
 		return chat
 
 	@classmethod
 	def Update(cls, chat_id, list_of_users):
-		chat = cls.get(pk=chat_id)
+		chat = cls.objects.get(pk=chat_id)
 		current_users = chat.users.all()
 		if chat:
 			for user in list_of_users:
 				if not user in list_of_users:
-					chat.add(user)
+					chat.users.add(user)
 			for user in current_users:
 				if not user in list_of_users:
 					chat.users.remove(user)
@@ -113,7 +116,7 @@ class Chat(models.Model):
 
 	@classmethod
 	def Delete(cls, chat_id):
-		chat = cls.get(pk=chat_id)
+		chat = cls.objects.get(pk=chat_id)
 		if chat:
 			chat.delete()
 			return True
