@@ -7,6 +7,7 @@ class UserProfile(models.Model):
 	#a later date
 	user = models.ForeignKey(User, unique=True)
 	friends = models.ManyToManyField("self")
+	online = models.BooleanField(default=False)
 
 	def __str__(self):
 		return str(self.user.username)
@@ -24,6 +25,16 @@ class UserProfile(models.Model):
 			return None
 
 	@classmethod
+	def GetAll(cls):
+		users = cls.objects.all()
+		return users
+
+	@classmethod
+	def GetOnline(cls):
+		users = cls.objects.filter(online=True)
+		return users
+
+	@classmethod
 	def GetFriends(cls, username):
 		user = cls.Get(username)
 		return user.friends.all()
@@ -34,6 +45,13 @@ class UserProfile(models.Model):
 		friend = cls.Get(friend_name)
 		user.friends.add(friend)
 		return user.friends.all()
+
+	@classmethod
+	def removeFriend(cls, username, friend_name):
+		user = cls.Get(username)
+		friend = cls.Get(friend_name)
+		user.friends.remove(friend)
+		return user.friends.all()	
 
 	@classmethod
 	def Create(cls, username, password):
