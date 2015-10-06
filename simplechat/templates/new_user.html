@@ -1,0 +1,11 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div>Create a new user</div>
+<form action="/users/create/" method="post">
+	{% csrf_token %}
+	<input type="text" placeholder="username" name="username">
+	<input type="text" placeholder="password" name="password">
+	<input type="submit">Submit</input>
+</form>
+{% endblock %}

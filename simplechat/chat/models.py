@@ -63,12 +63,12 @@ class UserProfile(models.Model):
 			login_user = User.objects.create_user(username=username, 
 				password=password)
 			login_user.save()
-			new_user = cls(user=login_user)
+			new_user = cls(user=login_user, online=True)
 			new_user.save()
-			return user
+			return new_user
 
 	@classmethod
-	def Update(cls, username, new_username=None, password=None):
+	def Update(cls, username, new_username=None, password=None, online=None):
 		all_users = User.objects.all()
 		matching_users = all_users.filter(username=username)
 		if len(matching_users) > 1 or len(matching_users) < 1:
@@ -77,10 +77,12 @@ class UserProfile(models.Model):
 		if len(users) == 1:
 			user = users[0]
 			if new_username:
-				user.user.username = new_username
+				user.users.all()[0].username = new_username
 			if password:
-				user.user.password = password
+				user.users.all()[0].password = password
 			user.user.save()
+			if online:
+				user.online = True
 			user.save()
 			return user
 		else:
