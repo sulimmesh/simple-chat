@@ -1,16 +1,22 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 #user class
-class User(models.Model):
-	username = models.CharField(primary_key=True, max_length=100)
-	password = models.CharField(max_length=100)
+class UserProfile(models.Model):
+	#this class exists in case more user information would be needed
+	#a later date
+	user = models.ForeignKey(User, unique=True)
 
 	def __str__(self):
-		return self.username
+		return str(self.user.username)
 
 	@classmethod
 	def Get(cls, username):
-		users = cls.objects.filter(username=username)
+		all_users = User.objects.all()
+		matching_users = all_users.filter(username=username)
+		if len(matching_users) > 1 or len(matching_users) < 1:
+			return None
+		users = cls.objects.filter(user=matching_users[0])
 		if users:
 			return users[0]
 		else:
@@ -18,23 +24,32 @@ class User(models.Model):
 
 	@classmethod
 	def Create(cls, username, password):
-		users = cls.objects.filter(username=username)
-		if len(users) > 0:
+		all_users = User.objects.all()
+		matching_users = all_users.filter(username=username)
+		if len(matching_users) > 0:
 			return None
 		else:
-			user = cls(username=username, password=password)
-			user.save()
+			login_user = User.objects.create_user(username=username, 
+				password=password)
+			login_user.save()
+			new_user = cls(user=login_user)
+			new_user.save()
 			return user
 
 	@classmethod
 	def Update(cls, username, new_username=None, password=None):
-		users = cls.objects.filter(username=username)
+		all_users = User.objects.all()
+		matching_users = all_users.filter(username=username)
+		if len(matching_users) > 1 or len(matching_users) < 1:
+			return None
+		users = cls.objects.filter(user=matching_users[0])
 		if len(users) == 1:
 			user = users[0]
 			if new_username:
-				user.username = new_username
+				user.user.username = new_username
 			if password:
-				user.password = password
+				user.user.password = password
+			user.user.save()
 			user.save()
 			return user
 		else:
@@ -43,7 +58,11 @@ class User(models.Model):
 
 	@classmethod
 	def Delete(cls, username):
-		users = cls.objects.filter(username=username)
+		all_users = User.objects.all()
+		matching_users = all_users.filter(username=username)
+		if len(matching_users) > 1 or len(matching_users) < 1:
+			return None
+		users = cls.objects.filter(user=matching_users[0])
 		if len(users) == 1:
 			user = users[0]
 			user.delete()
@@ -91,7 +110,7 @@ class Message(models.Model):
 		return True
 
 class Chat(models.Model):
-	users = models.ManyToManyField(User)
+	users = models.ManyToManyField(UserProfile)
 
 	def __str__(self):
 		return str(self.id)
