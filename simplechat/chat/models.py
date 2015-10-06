@@ -6,6 +6,7 @@ class UserProfile(models.Model):
 	#this class exists in case more user information would be needed
 	#a later date
 	user = models.ForeignKey(User, unique=True)
+	friends = models.ManyToManyField("self")
 
 	def __str__(self):
 		return str(self.user.username)
@@ -21,6 +22,18 @@ class UserProfile(models.Model):
 			return users[0]
 		else:
 			return None
+
+	@classmethod
+	def GetFriends(cls, username):
+		user = cls.Get(username)
+		return user.friends.all()
+
+	@classmethod
+	def AddFriend(cls, username, friend_name):
+		user = cls.Get(username)
+		friend = cls.Get(friend_name)
+		user.friends.add(friend)
+		return user.friends.all()
 
 	@classmethod
 	def Create(cls, username, password):
