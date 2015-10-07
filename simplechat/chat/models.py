@@ -160,6 +160,11 @@ class Chat(models.Model):
 			return None
 
 	@classmethod
+	def GetByProfile(cls, profile):
+		chats = cls.objects.filter(users=profile)
+		return chats
+
+	@classmethod
 	def Create(cls, list_of_users):
 		chat = cls()
 		chat.save()

@@ -1,0 +1,13 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div>Hello, {{profile.user.username}}</div>
+<div>Friends</div>
+{% for friend in friends %}
+<div>{{friend.user.username}}</div>
+{% endfor %}
+<div>Chats</div>
+{% for chat in chats %}
+<div>{{chat.id}}</div>
+{% endfor %}
+{% endblock %}

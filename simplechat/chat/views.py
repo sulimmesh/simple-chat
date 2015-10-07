@@ -40,12 +40,19 @@ class Login(View):
 		return render(request, template, context)
 
 class Users(View):
-	def get(self, request):
+	def get(self, request, username):
 		context = {}
-		template = "new_user.html"
+		if username == "create":
+			template = "new_user.html"
+		else:
+			template = "user.html"
+			profile = models.UserProfile.Get(username)
+			context["profile"] = profile
+			context["friends"] = profile.friends.all()
+			context["chats"] = models.Chat.GetByProfile(profile)
 		return render(request, template, context)
 
-	def post(self, request):
+	def post(self, request, username):
 		context = {}
 		username = request.POST["username"]
 		password = request.POST["password"]
