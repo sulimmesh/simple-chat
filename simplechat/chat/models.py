@@ -43,6 +43,8 @@ class UserProfile(models.Model):
 	def AddFriend(cls, username, friend_name):
 		user = cls.Get(username)
 		friend = cls.Get(friend_name)
+		if user == friend:
+			return user.friends.all()
 		user.friends.add(friend)
 		return user.friends.all()
 

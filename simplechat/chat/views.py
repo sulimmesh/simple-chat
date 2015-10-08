@@ -40,29 +40,46 @@ class Login(View):
 		return render(request, template, context)
 
 class Users(View):
-	def get(self, request, username):
+	def get(self, request, action, username):
 		context = {}
-		if username == "create":
+		if action == "create":
 			template = "new_user.html"
-		else:
-			template = "user.html"
-			profile = models.UserProfile.Get(username)
-			context["profile"] = profile
-			context["friends"] = profile.friends.all()
-			context["chats"] = models.Chat.GetByProfile(profile)
+		elif action == "view":
+			if username == "all":
+				template = "users.html"
+				profile = models.UserProfile.Get(username)
+				context["profile"] = profile
+				profiles = models.UserProfile.GetAll()
+				context["profiles"] = profiles
+			else:
+				template = "user.html"
+				profile = models.UserProfile.Get(username)
+				context["profile"] = profile
+				context["friends"] = profile.friends.all()
+				context["chats"] = models.Chat.GetByProfile(profile)
 		return render(request, template, context)
 
-	def post(self, request, username):
+	def post(self, request, action, username):
 		context = {}
-		username = request.POST["username"]
-		password = request.POST["password"]
-		new_user = models.UserProfile.Create(username, password)
-		user = authenticate(username=username, password=password)
-		if user:
-			login(request, user)
-			template = "home.html"
-		else:
-			template = "login.html"
+		if action == "create":
+			username = request.POST["username"]
+			password = request.POST["password"]
+			new_user = models.UserProfile.Create(username, password)
+			user = authenticate(username=username, password=password)
+			if user:
+				login(request, user)
+				template = "home.html"
+			else:
+				template = "login.html"
+		elif action == "add":
+			friend = models.UserProfile.Get(username)
+			user = request.user
+			profile = models.UserProfile.Get(user.username)
+			friends_list = models.UserProfile.AddFriend(profile.user.username, 
+				friend.user.username)
+			context["profile"] = profile
+			context["profiles"] = models.UserProfile.GetAll()
+			template = "users.html"
 		return render(request, template, context)
 
 

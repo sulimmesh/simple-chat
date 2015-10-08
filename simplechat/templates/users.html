@@ -1,0 +1,12 @@
+{% extends "index.html" %}
+
+{% block content %}
+	<div>Users</div>
+	{% for profile in profiles %}
+	<div><span>{{profile.user.username}}
+		<form action="/users/add/{{profile.user.username}}/" method="post">
+			{% csrf_token %}
+			<input value="Add Friend" type="submit"></input>
+		</form></span></div>
+	{% endfor %}
+{% endblock %}

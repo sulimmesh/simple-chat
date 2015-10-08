@@ -2,5 +2,6 @@
 
 {% block content %}
 <div>Welcome {{profile.user}}, This is the home page</div>
-<a href="/users/{{profile.user.username}}/">Your Profile</a>
+<a href="/users/view/{{profile.user.username}}/">Your Profile</a>
+<a href="/users/view/all/">All Users</a>
 {% endblock %}
