@@ -107,6 +107,7 @@ class UserProfile(models.Model):
 
 class Message(models.Model):
 	text = models.CharField(max_length=500)
+	user = models.ForeignKey("UserProfile")
 	chat = models.ForeignKey("Chat")
 
 	def __str__(self):
@@ -130,8 +131,8 @@ class Message(models.Model):
 			return messages
 
 	@classmethod
-	def Create(cls, text, chat):
-		message = cls(text=text, chat=chat)
+	def Create(cls, text, user, chat):
+		message = cls(text=text, user=user, chat=chat)
 		message.save()
 		return message
 
@@ -165,6 +166,15 @@ class Chat(models.Model):
 	def GetByProfile(cls, profile):
 		chats = cls.objects.filter(users=profile)
 		return chats
+
+	@classmethod
+	def GetProfiles(cls, chat_id):
+		chats = cls.objects.filter(pk=chat_id)
+		if len(chats) < 1:
+			return None
+		chat = chats[0]
+		return chat.users.all()
+
 
 	@classmethod
 	def Create(cls, list_of_users):

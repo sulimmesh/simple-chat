@@ -1,0 +1,12 @@
+{% extends "index.html" %}
+
+{% block content %}
+	{% for message in messages %}
+	<div>{{message.user}}: {{message.text}}</div>
+	{% endfor %}
+	<form action="/chats/message/{{chat.id}}/" method="post">
+		{% csrf_token %}
+		<input type="text" name="text" placeholder="Enter message text"></input>
+		<input type="submit" value="Send"></input>
+	</form>
+{% endblock %}

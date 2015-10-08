@@ -20,7 +20,6 @@ class Home(View):
 	def post(self, request):
 		pass
 
-
 class Login(View):
 	def get(self, request):
 		context = {}
@@ -80,6 +79,45 @@ class Users(View):
 			context["profile"] = profile
 			context["profiles"] = models.UserProfile.GetAll()
 			template = "users.html"
+		return render(request, template, context)
+
+class Chats(View):
+	def get(self, request, *args, **kwargs):
+		context = {}
+		chat_id = kwargs["chat_id"]
+		context["chat"] = models.Chat.Get(chat_id)
+		context["messages"] = models.Message.GetByChat(models.Chat.Get(chat_id))
+		context["profiles"] = models.Chat.GetProfiles(chat_id)
+		template = "chat.html"
+		return render(request, template, context)
+
+	def post(self, request, *args, **kwargs):
+		context = {}
+		action = None
+		username = None
+		chat_id = None
+		if "action" in kwargs.keys():
+			action = kwargs["action"]
+		if action == "invite":
+			username = kwargs["id"]
+			friends = models.UserProfile.GetFriends(request.user.username)
+			friend = models.UserProfile.Get(username)
+			profile = models.UserProfile.Get(request.user.username)
+			new_chat = models.Chat.Create([profile, friend])
+			context["friends"] = friends
+			context["profile"] = profile
+			context["chats"] = models.Chat.GetByProfile(profile)
+			template = "user.html"
+		elif action == "message":
+			chat_id = kwargs["id"]
+			text = request.POST["text"]
+			chat = models.Chat.Get(chat_id)
+			profile = models.UserProfile.Get(request.user.username)
+			message = models.Message.Create(text, profile, chat)
+			context["chat"] = models.Chat.Get(chat_id)
+			context["messages"] = models.Message.GetByChat(chat)
+			context["profile"] = profile
+			template = "chat.html"
 		return render(request, template, context)
 
 

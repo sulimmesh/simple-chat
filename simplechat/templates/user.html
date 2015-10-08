@@ -4,10 +4,15 @@
 <div>Hello, {{profile.user.username}}</div>
 <div>Friends</div>
 {% for friend in friends %}
-<div>{{friend.user.username}}</div>
+<div>{{friend.user.username}} 
+	<form method="post" action="/chats/invite/{{friend.user.username}}/"</div>
+		{% csrf_token %}
+		<input value="Invite to Chat" type="submit">
+	</form>
+</div>
 {% endfor %}
 <div>Chats</div>
 {% for chat in chats %}
-<div>{{chat.id}}</div>
+<a href="/chats/{{chat.id}}/">{{chat.id}}</a>
 {% endfor %}
 {% endblock %}
